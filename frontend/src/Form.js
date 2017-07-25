@@ -8,9 +8,9 @@ export default class GithubForm extends Component {
     data: null,
   };
 
+
   handleSubmit = (ev) => {
     ev.preventDefault();
-
     this.setState({ loading: true });
     var url = '/api/messages?';
     if (this.state.fromNumber) url = url + '&from=' + this.state.fromNumber;
@@ -92,9 +92,13 @@ export default class GithubForm extends Component {
         </Form>
 
         {this.state.data &&
-          <CodeBlock language="json">
-            {JSON.stringify(this.state.data, null, '  ')}
-          </CodeBlock>
+          <Table.Simple
+            loading="true"
+            items=JSON.stringify(this.state.data, null, '  ')
+          />
+          // <CodeBlock language="json">
+          //   {JSON.stringify(this.state.data, null, '  ')}
+          // </CodeBlock>
         }
 
       </FormBox>
