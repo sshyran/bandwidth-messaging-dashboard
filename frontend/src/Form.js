@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, FormBox, TextField, FlexFields, SubmitButtonField, CodeBlock, Table, Accordion } from '@bandwidth/shared-components';
+import { Form, FormBox, TextField, FlexFields, SubmitButtonField, CodeBlock, Table } from '@bandwidth/shared-components';
 
 export default class GithubForm extends Component {
   state = {
@@ -14,7 +14,11 @@ export default class GithubForm extends Component {
     this.setState({ loading: true });
     var url = '/api/messages?';
     if (this.state.fromNumber) url = url + '&from=' + this.state.fromNumber;
-    if (this.state.fromNumber) url = url + '&to=' + this.state.fromNumber;
+    if (this.state.toNumber) url = url + '&to=' + this.state.to;
+    if (this.state.fromDateTime) url = url + '&fromDateTime=' + this.state.fromDateTime;
+    if (this.state.toDateTime) url = url + '&toDateTime=' + this.state.toDateTime;
+    if (this.state.direction) url = url + '&direction=' + this.state.direction;
+    if (this.state.state) url = url + '&state=' + this.state.state;
     fetch(url)
     .then((response) => response.json())
     .then((json) => {
@@ -43,6 +47,42 @@ export default class GithubForm extends Component {
                   input={{
                     value: this.state.toNumber,
                     onChange: (ev) => this.setState({ toNumber: ev.target.value }),
+                  }}
+                />
+          </FlexFields>
+          <FlexFields>
+            <TextField
+                  label="From Date"
+                  input={{
+                    value: this.state.fromDateTime,
+                    onChange: (ev) => this.setState({ fromDateTime: ev.target.value }),
+                  }}
+                />
+          </FlexFields>
+          <FlexFields>
+            <TextField
+                  label="To Date"
+                  input={{
+                    value: this.state.toDateTime,
+                    onChange: (ev) => this.setState({ toDateTime: ev.target.value }),
+                  }}
+                />
+          </FlexFields>
+          <FlexFields>
+            <TextField
+                  label="Direction"
+                  input={{
+                    value: this.state.direction,
+                    onChange: (ev) => this.setState({ direction: ev.target.value }),
+                  }}
+                />
+          </FlexFields>
+          <FlexFields>
+            <TextField
+                  label="Status"
+                  input={{
+                    value: this.state.state,
+                    onChange: (ev) => this.setState({ state: ev.target.value }),
                   }}
                 />
           </FlexFields>
