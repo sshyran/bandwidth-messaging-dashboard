@@ -22,6 +22,7 @@ export default class App extends Component {
     if (this.state.toDateTime) url   = url + '&toDateTime=' + this.state.toDateTime;
     if (this.state.direction) url    = url + '&direction=' + this.state.direction;
     if (this.state.state) url        = url + '&state=' + this.state.state;
+
     fetch(url)
     .then((response) => response.json())
     .then((json) => {
