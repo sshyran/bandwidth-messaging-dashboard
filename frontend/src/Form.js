@@ -7,6 +7,7 @@ export default class App extends Component {
     loading: false,
     messages: null,
     page: 0,
+    pageSize: 15,
   };
 
 
@@ -23,13 +24,18 @@ export default class App extends Component {
     fetch(url)
     .then((response) => response.json())
     .then((json) => {
+      let pageCount;
+      if (json.messages.length < this.state.pageSize) {
+        pageCount = 1;
+      }
+      else {
+        pageCount = 2;
+      }
       this.setState({
         loading: false,
         messages  : json.messages,
         sortKey   : json.sortKey,
-        page      : 0,
-        pageSize  : 15,
-        pageCount : 2,
+        pageCount
       });
     });
   };
@@ -50,13 +56,19 @@ export default class App extends Component {
     if (fetchNextPage) {
       this.fetchNewMessages()
       .then( json => {
+        let pageCount;
+        if (json.messages.length < this.state.pageSize) {
+          pageCount = this.state.pageCount;
+        }
+        else {
+          pageCount = this.state.pageCount + 1;
+        }
         this.setState({
           messages  : [...this.state.messages, ...json.messages],
-          pageCount : this.state.pageCount + 1,
           page      : pageNumber,
-          pageSize  : 15,
           sortKey   : json.sortKey,
-          loading   : false
+          loading   : false,
+          pageCount,
         });
       });
     }
