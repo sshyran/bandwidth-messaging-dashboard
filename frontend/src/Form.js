@@ -4,10 +4,11 @@ const qs = require('qs');
 
 export default class App extends Component {
   state = {
-    loading: false,
-    messages: null,
-    page: 0,
-    pageSize: 15,
+    loading   : false,
+    messages  : null,
+    page      : 0,
+    pageSize  : 15,
+    pageCount : 0,
   };
 
 
@@ -24,6 +25,15 @@ export default class App extends Component {
     fetch(url)
     .then((response) => response.json())
     .then((json) => {
+      if (json.messages === undefined || json.messages.length < 1) {
+        this.setState({
+          loading   : false,
+          messages  : [],
+          pageCount : 0,
+          page      : 0,
+        });
+        return;
+      }
       let pageCount;
       if (json.messages.length < this.state.pageSize) {
         pageCount = 1;
@@ -32,9 +42,9 @@ export default class App extends Component {
         pageCount = 2;
       }
       this.setState({
-        loading: false,
-        messages  : json.messages,
-        sortKey   : json.sortKey,
+        loading  : false,
+        messages : json.messages,
+        sortKey  : json.sortKey,
         pageCount
       });
     });
@@ -83,21 +93,12 @@ export default class App extends Component {
 
   renderRow = (item) => (
     <Table.Row>
-      <Table.Cell> {item.callbackUrl} </Table.Cell>
-      <Table.Cell> {item.direction} </Table.Cell>
       <Table.Cell> {item.from} </Table.Cell>
-      <Table.Cell> {item.id} </Table.Cell>
+      <Table.Cell> {item.to} </Table.Cell>
+      <Table.Cell> {item.direction} </Table.Cell>
       <Table.Cell> {item.messageId} </Table.Cell>
       <Table.Cell> {item.state} </Table.Cell>
-      <Table.Cell> {item.text} </Table.Cell>
-      <Table.Cell> {item.media} </Table.Cell>
       <Table.Cell> {item.time} </Table.Cell>
-      <Table.Cell> {item.to} </Table.Cell>
-      <Table.Cell> {item.skipMMSCarrierValidation} </Table.Cell>
-      <Table.Cell> {item.receiptRequested} </Table.Cell>
-      <Table.Cell> {item.deliveryState} </Table.Cell>
-      <Table.Cell> {item.deliveryCode} </Table.Cell>
-      <Table.Cell> {item.deliveryDescription} </Table.Cell>
     </Table.Row>
   );
 
@@ -164,27 +165,16 @@ export default class App extends Component {
           </SubmitButtonField>
         </Form>
 
-
-
         {this.state.messages &&
           <Table.Simple
             loading={this.state.loading}
             columns={[
-              {name: "callbackUrl" },
-              {name: "direction" },
-              {name: "from" },
-              {name: "id" },
-              {name: "messageId" },
-              {name: "state" },
-              {name: "text" },
-              {name: "media" },
-              {name: "time" },
-              {name: "to" },
-              {name: "skipMMSCarrierValidation" },
-              {name: "receiptRequested" },
-              {name: "deliveryState" },
-              {name: "deliveryCode" },
-              {name: "deliveryDescription" }
+              {name: "from"},
+              {name: "to"},
+              {name: "direction"},
+              {name: "messageId"},
+              {name: "state"},
+              {name: "time"}
             ]}
             items={this.state.messages.slice(this.state.pageSize * this.state.page, this.state.pageSize * (this.state.page + 1))}
             renderRow={this.renderRow}

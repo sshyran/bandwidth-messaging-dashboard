@@ -28,7 +28,6 @@ router.get('/api/messages', async (req, res) => {
       messages: messages.messages,
       sortKey
     }
-    //console.log(response);
     res.send(response);
   }
   catch (e) {
