@@ -15,19 +15,15 @@ var client = new Bandwidth({
 router.use(express.static(path.join(__dirname, '../frontend/build')));
 
 router.get('/api/messages', async (req, res) => {
-  req.query.size = 1000;
   console.log(req.query);
+  req.query.size = 15;
   try {
     let messages = await client.Message.list(req.query);
-    let allMessages = messages.messages;
-    let hasNextPage = messages.hasNextPage;
-    while (hasNextPage) {
-      messages = await messages.getNextPage();
-      allMessages = allMessages.concat(messages.messages);
-      hasNextPage = messages.hasNextPage;
-      await timeout(1000);
+    const response = {
+      messages: messages.messages,
+      sortKey: messages.nextLink.sortKeyLT,
     }
-    res.send(allMessages);
+    res.send(response);
   }
   catch (e) {
     res.status(e.statusCode).send(e);
@@ -41,3 +37,24 @@ router.get('*', (req, res) => {
 });
 
 module.exports = router;
+
+
+  // try {
+  //   let messages = await client.Message.list(req.query);
+  //   const reponse = {
+  //     messages: messages.messages
+  //     nextLink: messages.nextLink
+  //   }
+  //   let hasNextPage = messages.hasNextPage;
+  //   while (hasNextPage) {
+  //     messages = await messages.getNextPage();
+  //     allMessages = allMessages.concat(messages.messages);
+  //     hasNextPage = messages.hasNextPage;
+  //     await timeout(1000);
+  //   }
+  //   res.send(messages);
+  //   res.send(allMessages);
+  // }
+  // catch (e) {
+  //   res.status(e.statusCode).send(e);
+  // }

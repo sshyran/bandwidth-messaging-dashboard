@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { Form, FormBox, TextField, FlexFields, SubmitButtonField, CodeBlock, Table } from '@bandwidth/shared-components';
+import { Form, FormBox, TextField, FlexFields, SubmitButtonField, CodeBlock, Table, Pagination} from '@bandwidth/shared-components';
 
-export default class GithubForm extends Component {
+export default class App extends Component {
   state = {
-    githubUser: '',
     loading: false,
-    data: null,
+    messages: null,
+    page: 0,
   };
 
 
@@ -13,20 +13,61 @@ export default class GithubForm extends Component {
     ev.preventDefault();
     this.setState({ loading: true });
     var url = '/api/messages?';
-    if (this.state.fromNumber) url = url + '&from=' + this.state.fromNumber;
-    if (this.state.toNumber) url = url + '&to=' + this.state.to;
+    if (this.state.fromNumber) url   = url + '&from=' + this.state.fromNumber;
+    if (this.state.toNumber) url     = url + '&to=' + this.state.to;
     if (this.state.fromDateTime) url = url + '&fromDateTime=' + this.state.fromDateTime;
-    if (this.state.toDateTime) url = url + '&toDateTime=' + this.state.toDateTime;
-    if (this.state.direction) url = url + '&direction=' + this.state.direction;
-    if (this.state.state) url = url + '&state=' + this.state.state;
+    if (this.state.toDateTime) url   = url + '&toDateTime=' + this.state.toDateTime;
+    if (this.state.direction) url    = url + '&direction=' + this.state.direction;
+    if (this.state.state) url        = url + '&state=' + this.state.state;
     fetch(url)
     .then((response) => response.json())
     .then((json) => {
-      //${this.state.githubUser}
-      this.setState({ data: json, loading: false });
+      this.setState({
+        loading: false,
+        messages  : json.messages,
+        sortKey   : json.sortKey,
+        page      : this.state.page,
+        pageSize  : 15,
+        pageCount : 2,
+      });
     });
   };
 
+  fetchNewMessages = () => {
+    var url = `/api/messages?sortKeyLT=${this.state.sortKey}`;
+    console.log(url);
+    return fetch(url)
+    .then( res => res.json());
+  };
+
+  pageChange = (pageNumber) => {
+    this.setState({ loading: true });
+    const numberOfMessages = this.state.messages.length;
+    console.log(numberOfMessages);
+    console.log(pageNumber);
+    console.log(this.state.pageSize);
+    const fetchNextPage = ((pageNumber * this.state.pageSize) >= numberOfMessages)
+    console.log(fetchNextPage);
+    if (fetchNextPage) {
+      this.fetchNewMessages()
+      .then( json => {
+        this.setState({
+          messages  : [...this.state.messages, ...json.messages],
+          pageCount : this.state.pageCount + 1,
+          page      : pageNumber,
+          pageSize  : 15,
+          sortKey   : json.sortKey,
+          loading   : false
+        });
+      });
+    }
+    else {
+      this.setState({
+        loading : false,
+        page    : pageNumber,
+      })
+    }
+  }
 
   render() {
     return (
@@ -91,15 +132,20 @@ export default class GithubForm extends Component {
           </SubmitButtonField>
         </Form>
 
-        {this.state.data &&
+        {this.state.messages &&
           <Table.Simple
-            loading="true"
-            items=JSON.stringify(this.state.data, null, '  ')
+            loading={this.state.loading}
+            columns={[{
+              name: 'text', displayName: 'Text',
+            }]}
+            items={this.state.messages.slice(this.state.pageSize * this.state.page, this.state.pageSize * (this.state.page + 1))}
           />
           // <CodeBlock language="json">
           //   {JSON.stringify(this.state.data, null, '  ')}
           // </CodeBlock>
         }
+
+        <Pagination pageCount={this.state.pageCount} currentPage={this.state.page} onPageSelected={this.pageChange} />
 
       </FormBox>
     );
