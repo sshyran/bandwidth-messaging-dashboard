@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Form, FormBox, TextField, FlexFields, SubmitButtonField, CodeBlock, Table, Pagination} from '@bandwidth/shared-components';
+const qs = require('qs');
 
 export default class App extends Component {
   state = {
@@ -14,7 +15,7 @@ export default class App extends Component {
     this.setState({ loading: true });
     var url = '/api/messages?';
     if (this.state.fromNumber) url   = url + '&from=' + this.state.fromNumber;
-    if (this.state.toNumber) url     = url + '&to=' + this.state.to;
+    if (this.state.toNumber) url     = url + '&to=' + this.state.toNumber;
     if (this.state.fromDateTime) url = url + '&fromDateTime=' + this.state.fromDateTime;
     if (this.state.toDateTime) url   = url + '&toDateTime=' + this.state.toDateTime;
     if (this.state.direction) url    = url + '&direction=' + this.state.direction;
@@ -26,7 +27,7 @@ export default class App extends Component {
         loading: false,
         messages  : json.messages,
         sortKey   : json.sortKey,
-        page      : this.state.page,
+        page      : 0,
         pageSize  : 15,
         pageCount : 2,
       });
@@ -34,7 +35,9 @@ export default class App extends Component {
   };
 
   fetchNewMessages = () => {
-    var url = `/api/messages?sortKeyLT=${this.state.sortKey}`;
+    const params = qs.stringify(this.state.sortKey)
+    console.log(params);
+    var url = `/api/messages?${params}`;
     console.log(url);
     return fetch(url)
     .then( res => res.json());
@@ -43,11 +46,7 @@ export default class App extends Component {
   pageChange = (pageNumber) => {
     this.setState({ loading: true });
     const numberOfMessages = this.state.messages.length;
-    console.log(numberOfMessages);
-    console.log(pageNumber);
-    console.log(this.state.pageSize);
     const fetchNextPage = ((pageNumber * this.state.pageSize) >= numberOfMessages)
-    console.log(fetchNextPage);
     if (fetchNextPage) {
       this.fetchNewMessages()
       .then( json => {
@@ -68,6 +67,27 @@ export default class App extends Component {
       })
     }
   }
+
+
+  renderRow = (item) => (
+    <Table.Row>
+      <Table.Cell> {item.callbackUrl} </Table.Cell>
+      <Table.Cell> {item.direction} </Table.Cell>
+      <Table.Cell> {item.from} </Table.Cell>
+      <Table.Cell> {item.id} </Table.Cell>
+      <Table.Cell> {item.messageId} </Table.Cell>
+      <Table.Cell> {item.state} </Table.Cell>
+      <Table.Cell> {item.text} </Table.Cell>
+      <Table.Cell> {item.media} </Table.Cell>
+      <Table.Cell> {item.time} </Table.Cell>
+      <Table.Cell> {item.to} </Table.Cell>
+      <Table.Cell> {item.skipMMSCarrierValidation} </Table.Cell>
+      <Table.Cell> {item.receiptRequested} </Table.Cell>
+      <Table.Cell> {item.deliveryState} </Table.Cell>
+      <Table.Cell> {item.deliveryCode} </Table.Cell>
+      <Table.Cell> {item.deliveryDescription} </Table.Cell>
+    </Table.Row>
+  );
 
   render() {
     return (
@@ -132,13 +152,30 @@ export default class App extends Component {
           </SubmitButtonField>
         </Form>
 
+
+
         {this.state.messages &&
           <Table.Simple
             loading={this.state.loading}
-            columns={[{
-              name: 'text', displayName: 'Text',
-            }]}
+            columns={[
+              {name: "callbackUrl" },
+              {name: "direction" },
+              {name: "from" },
+              {name: "id" },
+              {name: "messageId" },
+              {name: "state" },
+              {name: "text" },
+              {name: "media" },
+              {name: "time" },
+              {name: "to" },
+              {name: "skipMMSCarrierValidation" },
+              {name: "receiptRequested" },
+              {name: "deliveryState" },
+              {name: "deliveryCode" },
+              {name: "deliveryDescription" }
+            ]}
             items={this.state.messages.slice(this.state.pageSize * this.state.page, this.state.pageSize * (this.state.page + 1))}
+            renderRow={this.renderRow}
           />
           // <CodeBlock language="json">
           //   {JSON.stringify(this.state.data, null, '  ')}

@@ -19,10 +19,16 @@ router.get('/api/messages', async (req, res) => {
   req.query.size = 15;
   try {
     let messages = await client.Message.list(req.query);
+    let sortKey = {};
+    //console.log(messages.nextLink);
+    if (messages.hasNextPage) {
+      sortKey = messages.nextLink;
+    }
     const response = {
       messages: messages.messages,
-      sortKey: messages.nextLink.sortKeyLT,
+      sortKey
     }
+    //console.log(response);
     res.send(response);
   }
   catch (e) {
