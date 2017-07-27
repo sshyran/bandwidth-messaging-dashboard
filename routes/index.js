@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 var Bandwidth = require('node-bandwidth');
 var config = require('../config.js')
+const timeout = ms => new Promise(res => setTimeout(res, ms))
 
 var client = new Bandwidth({
   userId    : config.userId,
@@ -13,12 +14,25 @@ var client = new Bandwidth({
 // Serve static files from the React app
 router.use(express.static(path.join(__dirname, '../frontend/build')));
 
-router.get('/api/messages', (req, res) => {
-  client.Message.list(req.query).then(function (messages) {
-    res.send(messages);
-  }).catch(function(err) {
-    res.status(err.statusCode).send(err);
-  });
+router.get('/api/messages', async (req, res) => {
+  console.log(req.query);
+  req.query.size = 15;
+  try {
+    let messages = await client.Message.list(req.query);
+    let sortKey = {};
+    //console.log(messages.nextLink);
+    if (messages.hasNextPage) {
+      sortKey = messages.nextLink;
+    }
+    const response = {
+      messages: messages.messages,
+      sortKey
+    }
+    res.send(response);
+  }
+  catch (e) {
+    res.status(e.statusCode).send(e);
+  }
 });
 
 // The "catchall" handler: for any request that doesn't
@@ -28,3 +42,24 @@ router.get('*', (req, res) => {
 });
 
 module.exports = router;
+
+
+  // try {
+  //   let messages = await client.Message.list(req.query);
+  //   const reponse = {
+  //     messages: messages.messages
+  //     nextLink: messages.nextLink
+  //   }
+  //   let hasNextPage = messages.hasNextPage;
+  //   while (hasNextPage) {
+  //     messages = await messages.getNextPage();
+  //     allMessages = allMessages.concat(messages.messages);
+  //     hasNextPage = messages.hasNextPage;
+  //     await timeout(1000);
+  //   }
+  //   res.send(messages);
+  //   res.send(allMessages);
+  // }
+  // catch (e) {
+  //   res.status(e.statusCode).send(e);
+  // }
