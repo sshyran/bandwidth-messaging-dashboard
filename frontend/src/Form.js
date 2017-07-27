@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Form, FormBox, TextField, FlexFields, SubmitButtonField, CodeBlock, Table, Pagination} from '@bandwidth/shared-components';
-const qs = require('qs');
+import { Form, FormBox, Flow, Input, Select, SubmitButtonField, Table, Pagination} from '@bandwidth/shared-components';
+import qs from 'qs';
 
 export default class App extends Component {
   state = {
@@ -14,7 +14,13 @@ export default class App extends Component {
 
   handleSubmit = (ev) => {
     ev.preventDefault();
-    this.setState({ loading: true });
+    this.setState({
+      loading: true,
+      messages  : null,
+      page      : 0,
+      pageSize  : 15,
+      pageCount : 0,
+    });
     var url = '/api/messages?';
     if (this.state.fromNumber) url   = url + '&from=' + this.state.fromNumber;
     if (this.state.toNumber) url     = url + '&to=' + this.state.toNumber;
@@ -24,12 +30,29 @@ export default class App extends Component {
     if (this.state.state) url        = url + '&state=' + this.state.state;
 
     fetch(url)
-    .then((response) => response.json())
+    .then((response) => {return response.json()})
+    //   {
+    //   if (response.status >= 400) {
+    //     console.log(response);
+    //     const err = new Error(response.message).status(response.status);
+    //     throw err;
+    //   }
+    //   response.json()
+    // })
     .then((json) => {
-      if (json.messages === undefined || json.messages.length < 1) {
+      if (json.messages === undefined) {
         this.setState({
           loading   : false,
-          messages  : [],
+          messages  : null,
+          pageCount : 0,
+          page      : 0,
+        });
+        return;
+      }
+      else if (json.messages.length === 0){
+        this.setState({
+          loading   : false,
+          messages  : [{}],
           pageCount : 0,
           page      : 0,
         });
@@ -49,6 +72,9 @@ export default class App extends Component {
         pageCount
       });
     });
+    // .catch( err => {
+    //   console.log(err)
+    // });
   };
 
   fetchNewMessages = () => {
@@ -107,60 +133,70 @@ export default class App extends Component {
     return (
       <FormBox>
         <Form onSubmit={this.handleSubmit}>
-          <FlexFields>
-            <TextField
-                  label="Sender Phone Number"
-                  input={{
-                    value: this.state.fromNumber,
-                    onChange: (ev) => this.setState({ fromNumber: ev.target.value }),
-                  }}
+          <Flow>
+            <Flow.Row>
+              <Flow.Item
+                label="Sender Phone Number"
+                helpText="Like: +14443332222"
+              >
+                <Input
+                  value= {this.state.fromNumber}
+                  onChange= {(ev) => this.setState({ fromNumber: ev.target.value })}
                 />
-          </FlexFields>
-          <FlexFields>
-            <TextField
-                  label="Recpient Phone Number"
-                  input={{
-                    value: this.state.toNumber,
-                    onChange: (ev) => this.setState({ toNumber: ev.target.value }),
-                  }}
+              </Flow.Item>
+              <Flow.Item
+                label="Recpient Phone Number"
+                helpText= "Like: +14443332222"
+              >
+                <Input
+                  value= {this.state.toNumber}
+                  onChange= {(ev) => this.setState({ toNumber: ev.target.value })}
                 />
-          </FlexFields>
-          <FlexFields>
-            <TextField
-                  label="From Date"
-                  input={{
-                    value: this.state.fromDateTime,
-                    onChange: (ev) => this.setState({ fromDateTime: ev.target.value }),
-                  }}
-                />
-          </FlexFields>
-          <FlexFields>
-            <TextField
-                  label="To Date"
-                  input={{
-                    value: this.state.toDateTime,
-                    onChange: (ev) => this.setState({ toDateTime: ev.target.value }),
-                  }}
-                />
-          </FlexFields>
-          <FlexFields>
-            <TextField
+              </Flow.Item>
+              <Flow.Item
+                label="Direction"
+                helpText="Direction of message"
+              >
+                <Select
                   label="Direction"
-                  input={{
-                    value: this.state.direction,
-                    onChange: (ev) => this.setState({ direction: ev.target.value }),
-                  }}
+                  options={['in', 'out']}
+                  value={this.state.direction}
+                  onChange={(ev) => this.setState({ direction: ev })}
                 />
-          </FlexFields>
-          <FlexFields>
-            <TextField
-                  label="Status"
-                  input={{
-                    value: this.state.state,
-                    onChange: (ev) => this.setState({ state: ev.target.value }),
-                  }}
+              </Flow.Item>
+            </Flow.Row>
+            <Flow.Row>
+              <Flow.Item
+                label="From Date"
+                helpText= "Like: yyyy-MM-dd"
+              >
+                <Input
+                  value= {this.state.fromDateTime}
+                  onChange={(ev) => this.setState({ fromDateTime: ev.target.value })}
                 />
-          </FlexFields>
+              </Flow.Item>
+              <Flow.Item
+                label="To Date"
+                helpText= "Like: yyyy-MM-dd"
+              >
+                <Input
+                  value = {this.state.toDateTime}
+                  onChange={(ev) => this.setState({ toDateTime: ev.target.value })}
+                />
+              </Flow.Item>
+              <Flow.Item
+                label="Message State"
+                helpText="Values are: received, queued, sending, sent, error"
+              >
+                <Select
+                  label="State"
+                  options={['received','queued','sending','sent','error',]}
+                  value={this.state.state}
+                  onChange={(ev) => this.setState({ state: ev })}
+                />
+              </Flow.Item>
+            </Flow.Row>
+          </Flow>
           <SubmitButtonField>
             Find
           </SubmitButtonField>
@@ -180,9 +216,6 @@ export default class App extends Component {
             items={this.state.messages.slice(this.state.pageSize * this.state.page, this.state.pageSize * (this.state.page + 1))}
             renderRow={this.renderRow}
           />
-          // <CodeBlock language="json">
-          //   {JSON.stringify(this.state.data, null, '  ')}
-          // </CodeBlock>
         }
 
         <Pagination pageCount={this.state.pageCount} currentPage={this.state.page} onPageSelected={this.pageChange} />
