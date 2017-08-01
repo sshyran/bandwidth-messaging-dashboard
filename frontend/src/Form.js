@@ -1,16 +1,26 @@
 import React, { Component } from 'react';
-import { Form, FormBox, Flow, Input, Select, SubmitButtonField, Table, Pagination} from '@bandwidth/shared-components';
+import { Form, FormBox, Flow, Input, Select, SubmitButtonField, Table, Pagination, Modal} from '@bandwidth/shared-components';
 import qs from 'qs';
 
 export default class App extends Component {
   state = {
-    loading   : false,
-    messages  : null,
-    page      : 0,
-    pageSize  : 15,
-    pageCount : 0,
+    loading      : false,
+    messages     : null,
+    page         : 0,
+    pageSize     : 15,
+    pageCount    : 0,
+    error        : false,
+    errorMessage : null,
+    details       : null,
   };
 
+  closeModal = () => {
+    this.setState({
+      error: false,
+      errorMessage: null,
+      details     : null,
+    });
+  };
 
   handleSubmit = (ev) => {
     ev.preventDefault();
@@ -30,16 +40,22 @@ export default class App extends Component {
     if (this.state.state) url        = url + '&state=' + this.state.state;
 
     fetch(url)
-    .then((response) => {return response.json()})
-    //   {
-    //   if (response.status >= 400) {
-    //     console.log(response);
-    //     const err = new Error(response.message).status(response.status);
-    //     throw err;
-    //   }
-    //   response.json()
-    // })
+    .then((response) => {
+      if (!response.ok) {
+        console.log(response);
+        this.setState({
+          error: true,
+          errorMessage: response.statusText
+        });
+      }
+      else {
+        return response.json();
+      }
+    })
     .then((json) => {
+      if (this.state.error){
+        return;
+      }
       if (json.messages === undefined) {
         this.setState({
           loading   : false,
@@ -71,10 +87,10 @@ export default class App extends Component {
         sortKey  : json.sortKey,
         pageCount
       });
+    })
+    .catch( err => {
+      console.log(err)
     });
-    // .catch( err => {
-    //   console.log(err)
-    // });
   };
 
   fetchNewMessages = () => {
@@ -117,6 +133,34 @@ export default class App extends Component {
     }
   }
 
+  renderDetails = (item) => {
+    console.log(item);
+//
+    return (
+      <div>
+      <thead>
+      <Table.Row>
+        <Table.Header> Text </Table.Header>
+        <Table.Header> Media </Table.Header>
+        <Table.Header> CallbackUrl </Table.Header>
+        <Table.Header> receiptRequested </Table.Header>
+        <Table.Header> deliveryState </Table.Header>
+        <Table.Header> deliveryCode </Table.Header>
+        <Table.Header> deliveryDescription </Table.Header>
+      </Table.Row>
+      </thead>
+      <tbody>
+        <Table.Cell> {item.text} </Table.Cell>
+        <Table.Cell> {item.media} </Table.Cell>
+        <Table.Cell> {item.callbackUrl} </Table.Cell>
+        <Table.Cell> {item.receiptRequested} </Table.Cell>
+        <Table.Cell> {item.deliveryState} </Table.Cell>
+        <Table.Cell> {item.deliveryCode} </Table.Cell>
+        <Table.Cell> {item.deliveryDescription} </Table.Cell>
+      </tbody>
+      </div>
+    )
+  };
 
   renderRow = (item) => (
     <Table.Row>
@@ -161,6 +205,7 @@ export default class App extends Component {
                   label="Direction"
                   options={['in', 'out']}
                   value={this.state.direction}
+                  noneText="Any"
                   onChange={(ev) => this.setState({ direction: ev })}
                 />
               </Flow.Item>
@@ -190,17 +235,25 @@ export default class App extends Component {
               >
                 <Select
                   label="State"
+                  noneText="Any"
                   options={['received','queued','sending','sent','error',]}
                   value={this.state.state}
                   onChange={(ev) => this.setState({ state: ev })}
                 />
               </Flow.Item>
             </Flow.Row>
-          </Flow>
           <SubmitButtonField>
             Find
           </SubmitButtonField>
+          </Flow>
+
         </Form>
+
+        {this.state.error &&
+          <Modal onBlockerClicked = {this.closeModal} title= 'Bad Request'>
+            {this.state.errorMessage}
+          </Modal>
+        }
 
         {this.state.messages &&
           <Table.Simple
@@ -215,6 +268,7 @@ export default class App extends Component {
             ]}
             items={this.state.messages.slice(this.state.pageSize * this.state.page, this.state.pageSize * (this.state.page + 1))}
             renderRow={this.renderRow}
+            renderDetails={this.renderDetails}
           />
         }
 

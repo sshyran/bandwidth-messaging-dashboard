@@ -31,7 +31,9 @@ router.get('/api/messages', async (req, res) => {
     res.send(response);
   }
   catch (e) {
-    res.status(e.statusCode).send(e);
+    console.log(e.message);
+    res.statusMessage = e.message;
+    res.status(e.statusCode).end();
   }
 });
 
@@ -42,24 +44,3 @@ router.get('*', (req, res) => {
 });
 
 module.exports = router;
-
-
-  // try {
-  //   let messages = await client.Message.list(req.query);
-  //   const reponse = {
-  //     messages: messages.messages
-  //     nextLink: messages.nextLink
-  //   }
-  //   let hasNextPage = messages.hasNextPage;
-  //   while (hasNextPage) {
-  //     messages = await messages.getNextPage();
-  //     allMessages = allMessages.concat(messages.messages);
-  //     hasNextPage = messages.hasNextPage;
-  //     await timeout(1000);
-  //   }
-  //   res.send(messages);
-  //   res.send(allMessages);
-  // }
-  // catch (e) {
-  //   res.status(e.statusCode).send(e);
-  // }
