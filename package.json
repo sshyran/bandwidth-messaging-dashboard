@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": false,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "DEBUG=* node ./bin/www",
     "heroku-postbuild": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {
@@ -12,5 +12,8 @@
     "express": "~4.15.2",
     "morgan": "~1.8.1",
     "node-bandwidth": "^2.3.4"
+  },
+  "engines": {
+    "node": "8.1.x"
   }
 }
