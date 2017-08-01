@@ -55,8 +55,9 @@ export default class App extends Component {
       if (!response.ok) {
         console.log(response);
         this.setState({
-          error: true,
-          errorMessage: response.statusText
+          error        : true,
+          errorMessage : response.statusText,
+          loading      : false,
         });
       }
       else {
