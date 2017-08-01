@@ -1,5 +1,16 @@
 import React, { Component } from 'react';
-import { Form, FormBox, Flow, Input, Select, SubmitButtonField, Table, Pagination, Modal} from '@bandwidth/shared-components';
+import {
+  Form,
+  FormBox,
+  Flow,
+  Input,
+  Select,
+  Button,
+  Table,
+  Pagination,
+  Modal,
+  Spacing,
+} from '@bandwidth/shared-components';
 import qs from 'qs';
 
 export default class App extends Component {
@@ -134,32 +145,23 @@ export default class App extends Component {
   }
 
   renderDetails = (item) => {
-    console.log(item);
-//
     return (
-      <div>
-      <thead>
-      <Table.Row>
-        <Table.Header> Text </Table.Header>
-        <Table.Header> Media </Table.Header>
-        <Table.Header> CallbackUrl </Table.Header>
-        <Table.Header> receiptRequested </Table.Header>
-        <Table.Header> deliveryState </Table.Header>
-        <Table.Header> deliveryCode </Table.Header>
-        <Table.Header> deliveryDescription </Table.Header>
-      </Table.Row>
-      </thead>
-      <tbody>
-        <Table.Cell> {item.text} </Table.Cell>
-        <Table.Cell> {item.media} </Table.Cell>
-        <Table.Cell> {item.callbackUrl} </Table.Cell>
-        <Table.Cell> {item.receiptRequested} </Table.Cell>
-        <Table.Cell> {item.deliveryState} </Table.Cell>
-        <Table.Cell> {item.deliveryCode} </Table.Cell>
-        <Table.Cell> {item.deliveryDescription} </Table.Cell>
-      </tbody>
-      </div>
-    )
+      <Spacing>
+        <Flow>
+          <Flow.Row>
+            <Flow.Item label="Text" flexibleContent>{item.text}</Flow.Item>
+            <Flow.Item label="Media">{item.media}</Flow.Item>
+          </Flow.Row>
+          <Flow.Row>
+            <Flow.Item label="Callback URL">{item.callbackUrl}</Flow.Item>
+            <Flow.Item label="Receipt Requested">{item.receiptRequested}</Flow.Item>
+            <Flow.Item label="Delivery State">{item.deliveryState}</Flow.Item>
+            <Flow.Item label="Delivery Code">{item.deliveryCode}</Flow.Item>
+            <Flow.Item label="Delivery Description">{item.deliveryDescription}</Flow.Item>
+          </Flow.Row>
+        </Flow>
+      </Spacing>
+    );
   };
 
   renderRow = (item) => (
@@ -174,6 +176,8 @@ export default class App extends Component {
   );
 
   render() {
+    const { loading } = this.state;
+
     return (
       <FormBox>
         <Form onSubmit={this.handleSubmit}>
@@ -242,9 +246,9 @@ export default class App extends Component {
                 />
               </Flow.Item>
             </Flow.Row>
-          <SubmitButtonField>
+          <Button.Submit loading={loading}>
             Find
-          </SubmitButtonField>
+          </Button.Submit>
           </Flow>
 
         </Form>
