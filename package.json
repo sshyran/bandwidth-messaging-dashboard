@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": false,
   "scripts": {
-    "start": "DEBUG=* node ./bin/www",
+    "start": "DEBUG=express*,bandwidth-message-dashboard-backend node ./bin/www",
     "heroku-postbuild": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {
