@@ -4,6 +4,7 @@
   "private": false,
   "scripts": {
     "start": "DEBUG=express*,bandwidth-message-dashboard-backend node ./bin/www",
+    "debug": "node ./bin/www & cd frontend && npm run start &",
     "heroku-postbuild": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {
