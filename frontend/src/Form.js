@@ -49,6 +49,7 @@ export default class App extends Component {
     if (this.state.toDateTime) url   = url + '&toDateTime=' + this.state.toDateTime;
     if (this.state.direction) url    = url + '&direction=' + this.state.direction;
     if (this.state.state) url        = url + '&state=' + this.state.state;
+    if (this.state.deliveryState) url= url + '&deliveryState=' + this.state.deliveryState;
 
     fetch(url)
     .then((response) => {
@@ -241,9 +242,21 @@ export default class App extends Component {
                 <Select
                   label="State"
                   noneText="Any"
-                  options={['received','queued','sending','sent','error',]}
+                  options={['received','queued','sending','sent','error']}
                   value={this.state.state}
                   onChange={(ev) => this.setState({ state: ev })}
+                />
+              </Flow.Item>
+              <Flow.Item
+                label="Delivery State"
+                helpText="Values are: waiting, delivered, not-delivered"
+              >
+                <Select
+                  label="State"
+                  noneText="Any"
+                  options={['waiting','delivered','not-delivered']}
+                  value={this.state.deliveryState}
+                  onChange={(ev) => this.setState({ deliveryState: ev })}
                 />
               </Flow.Item>
             </Flow.Row>
