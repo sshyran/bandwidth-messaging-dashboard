@@ -3,18 +3,19 @@
   "version": "0.0.1",
   "private": false,
   "scripts": {
-    "start": "DEBUG=express*,bandwidth-message-dashboard-backend node ./bin/www",
+    "start": "node ./bin/www",
     "debug": "node ./bin/www & cd frontend && npm run start &",
     "heroku-postbuild": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {
-    "body-parser": "~1.17.1",
-    "debug": "~2.6.3",
-    "express": "~4.15.2",
-    "morgan": "~1.8.1",
-    "node-bandwidth": "^2.3.4"
+    "body-parser": "~1.18.2",
+    "debug": "~3.1.0",
+    "express": "^4.16.2",
+    "morgan": "~1.9.0",
+    "node-bandwidth": "^2.3.4",
+    "npm": "^5.7.1"
   },
   "engines": {
-    "node": "8.1.x"
+    "node": ">8.1"
   }
 }
